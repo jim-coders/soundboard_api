@@ -1,6 +1,23 @@
 import mongoose, { Schema } from 'mongoose';
-import bcrypt from 'bcryptjs';
-import { IUser } from './types';
+
+export interface IUser extends Document {
+  username: string;
+  email: string;
+  password: string;
+  sounds: mongoose.Types.ObjectId[];
+  favorites: mongoose.Types.ObjectId[];
+  comparePassword(candidatePassword: string): Promise<boolean>;
+  createdAt: Date;
+  __v?: number;
+}
+
+export type BaseUserInput = Partial<
+  Pick<IUser, 'username' | 'email' | 'password' | 'sounds' | 'favorites'>
+>;
+
+export type CreateUserInput = Required<
+  Pick<BaseUserInput, 'username' | 'email' | 'password'>
+>;
 
 const UserSchema: Schema<IUser> = new Schema({
   username: {
@@ -22,6 +39,7 @@ const UserSchema: Schema<IUser> = new Schema({
     type: String,
     required: true,
     minlength: 6,
+    select: false,
   },
   sounds: [
     {
@@ -39,6 +57,7 @@ const UserSchema: Schema<IUser> = new Schema({
     type: Date,
     default: Date.now,
   },
+  __v: { type: Number, select: false },
 });
 
 const User = mongoose.model<IUser>('User', UserSchema);
