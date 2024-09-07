@@ -1,11 +1,9 @@
 import { ObjectId } from 'mongodb';
-import hashPassword from '../utils/hashPassword';
 import User, { CreateUserInput, IUser } from './User.model';
 
 const createUser = async (user: CreateUserInput): Promise<IUser> => {
   const { username, email, password } = user;
-  const hashedPassword = await hashPassword(password);
-  const newUser = new User({ username, email, password: hashedPassword });
+  const newUser = new User({ username, email, password });
 
   await newUser.save();
 

@@ -7,4 +7,6 @@ const router: Router = Router();
 router.use('/users', userRoutes);
 // router.use(soundRoutes)
 
+// make this just a file at the index level called routes
+
 export default router;

@@ -4,8 +4,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import router from './routes';
 
-import { appPort } from './utils/config';
-import { connectToMongoDB } from './configs';
+import { connectToMongoDB } from './db';
+import { appPort } from './config';
 import errorHandler from './middlewares/errorHandler';
 
 dotenv.config();
@@ -29,7 +29,7 @@ app.use(
 app.use(helmet());
 
 // Routes
-app.use(router); // TODO: Change this
+app.use(router);
 
 // Error handling middleware
 app.use(errorHandler);

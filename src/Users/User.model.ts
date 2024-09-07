@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import mongoose, { Schema } from 'mongoose';
 
 export interface IUser extends Document {
@@ -60,5 +61,25 @@ const UserSchema: Schema<IUser> = new Schema({
   __v: { type: Number, select: false },
 });
 
+UserSchema.pre('save', async function (next) {
+  const user = this;
+
+  if (!user.isModified('password')) return next();
+
+  const salt = await bcrypt.genSalt(10);
+  bcrypt.hash(user.password, salt);
+
+  next();
+});
+
+UserSchema.methods.comparePassword = async function (
+  candidatePassword: string
+) {
+  const user = this.toJSON();
+
+  return bcrypt.compare(candidatePassword, user.password);
+};
+
 const User = mongoose.model<IUser>('User', UserSchema);
+
 export default User;

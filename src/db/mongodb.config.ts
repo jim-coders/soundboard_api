@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { db_uri, env } from '../utils/config';
+import { db_uri, env } from '../config/globalConfig';
 
 const connectToMongoDB = async () => {
   try {
