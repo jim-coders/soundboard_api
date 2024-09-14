@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import userService from './user.service';
+import userService from './users.service';
 import { ObjectId } from 'mongodb';
 
 export const postUsers = async (req: Request, res: Response): Promise<void> => {

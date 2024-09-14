@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import userRoutes from '../Users/user.routes';
-// import soundRoutes from './soundRoutes'
+import userRoutes from '../Users/users.routes';
+import soundRoutes from '../Sounds/sounds.routes';
 
 const router: Router = Router();
 
 router.use('/users', userRoutes);
-// router.use(soundRoutes)
+router.use('/sounds', soundRoutes);
 
 // make this just a file at the index level called routes
 

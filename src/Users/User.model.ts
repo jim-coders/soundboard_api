@@ -5,7 +5,6 @@ export interface IUser extends Document {
   username: string;
   email: string;
   password: string;
-  sounds: mongoose.Types.ObjectId[];
   favorites: mongoose.Types.ObjectId[];
   comparePassword(candidatePassword: string): Promise<boolean>;
   createdAt: Date;
@@ -13,7 +12,7 @@ export interface IUser extends Document {
 }
 
 export type BaseUserInput = Partial<
-  Pick<IUser, 'username' | 'email' | 'password' | 'sounds' | 'favorites'>
+  Pick<IUser, 'username' | 'email' | 'password' | 'favorites'>
 >;
 
 export type CreateUserInput = Required<
@@ -21,6 +20,25 @@ export type CreateUserInput = Required<
 >;
 
 const UserSchema: Schema<IUser> = new Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    match: [/.+@.+\..+/, 'Please enter a valid email address'],
+  },
+  favorites: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Sound',
+    },
+  ],
+  password: {
+    type: String,
+    required: true,
+    minlength: 6,
+    select: false,
+  },
   username: {
     type: String,
     required: true,
@@ -29,31 +47,6 @@ const UserSchema: Schema<IUser> = new Schema({
     minlength: 3,
     maxlength: 25,
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    match: [/.+@.+\..+/, 'Please enter a valid email address'],
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 6,
-    select: false,
-  },
-  sounds: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Sound',
-    },
-  ],
-  favorites: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Sound',
-    },
-  ],
   createdAt: {
     type: Date,
     default: Date.now,

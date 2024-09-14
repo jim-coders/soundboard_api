@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { postUsers, getUserById, getManyUsers } from './user.controller';
+import { postUsers, getUserById, getManyUsers } from './users.controller';
 
 const router: Router = Router();
 router.get('/', getManyUsers);

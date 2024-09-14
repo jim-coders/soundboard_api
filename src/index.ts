@@ -38,6 +38,11 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to Our Soundboard Server');
 });
 
+// 404 handling
+app.get('*', function (req, res) {
+  return res.status(404).json('Sir, this is a Wendys');
+});
+
 app.listen(port, () => {
   console.log(`Server is Fire at http://localhost:${port}`);
 });
