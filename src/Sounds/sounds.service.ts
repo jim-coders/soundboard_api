@@ -5,14 +5,11 @@ const createSound = async (
   sound: CreateSoundInput,
   userId: ObjectId
 ): Promise<ISound> => {
-  const { description, title, url, metadata } = sound;
-
-  console.log({ sound }, { userId });
+  const { description, title, metadata } = sound;
 
   const newSound = new Sound({
     description,
     title,
-    url,
     metadata,
     user: userId,
   });

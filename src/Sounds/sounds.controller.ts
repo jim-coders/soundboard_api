@@ -6,14 +6,13 @@ export const postSounds = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { description, title, url, metadata, userId } = req.body;
+  const { description, title, metadata, userId } = req.body;
 
   try {
     const userSound = await soundService.createSound(
       {
         description,
         title,
-        url,
         metadata,
       },
       userId

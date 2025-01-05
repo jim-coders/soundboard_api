@@ -4,20 +4,23 @@ const { Schema } = mongoose;
 export interface ISound extends Document {
   description: string;
   duration: string;
-  metadata: Record<string, unknown>;
+  metadata: {
+    s3Key: string;
+    bucketName: string;
+    fileType: string;
+  };
   title: string;
-  url: string;
   user: mongoose.Types.ObjectId;
   createdAt: Date;
   __v?: number;
 }
 
 export type BaseSoundInput = Partial<
-  Pick<ISound, 'description' | 'title' | 'url' | 'metadata'>
+  Pick<ISound, 'description' | 'title' | 'metadata'>
 >;
 
 export type CreateSoundInput = Required<
-  Pick<BaseSoundInput, 'description' | 'title' | 'url' | 'metadata'>
+  Pick<BaseSoundInput, 'description' | 'title' | 'metadata'>
 >;
 
 const SoundSchema = new Schema({
@@ -27,11 +30,12 @@ const SoundSchema = new Schema({
   duration: {
     type: String, // Duration in seconds
   },
-  title: {
-    type: String,
-    required: true,
+  metadata: {
+    s3Key: String, // The unique key for the sound in the S3 bucket
+    bucketName: String, // The name of the S3 bucket
+    fileType: String, // MIME type of the file (e.g., 'audio/mpeg', 'audio/wav')
   },
-  url: {
+  title: {
     type: String,
     required: true,
   },

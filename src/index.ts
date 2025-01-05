@@ -2,11 +2,12 @@ import express, { Request, Response, Application } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
-import router from './routes';
+import passport from 'passport';
 
+import router from './routes';
 import { connectToMongoDB } from './db';
-import { appPort } from './config';
-import errorHandler from './middlewares/errorHandler';
+import { appPort, passportConfig } from './config';
+import { errorHandler } from './middlewares';
 
 dotenv.config();
 
@@ -27,16 +28,18 @@ app.use(
   })
 );
 app.use(helmet());
+app.use(passport.initialize());
+passportConfig(passport);
 
 // Routes
 app.use(router);
 
-// Error handling middleware
-app.use(errorHandler);
-
 app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to Our Soundboard Server');
 });
+
+// Error handling
+app.use(errorHandler);
 
 // 404 handling
 app.get('*', function (req, res) {
