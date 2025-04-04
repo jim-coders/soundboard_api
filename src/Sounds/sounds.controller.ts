@@ -1,11 +1,14 @@
-import { Request, Response } from 'express';
-import soundService from './sounds.service';
 import { ObjectId } from 'mongodb';
+import { NextFunction, Request, Response } from 'express';
+import { ControllerResponse } from '../types';
+import soundService from './sounds.service';
+import { SoundCreateError, SoundServiceError } from './errors';
 
 export const postSounds = async (
   req: Request,
-  res: Response
-): Promise<void> => {
+  res: Response,
+  next: NextFunction
+): ControllerResponse => {
   const { description, title, metadata, userId } = req.body;
 
   try {
@@ -17,35 +20,38 @@ export const postSounds = async (
       },
       userId
     );
-    res.status(201).json(userSound);
+    return res.status(201).json(userSound);
   } catch (err: any) {
-    res.status(400).json({ message: err.message });
+    return next(new SoundCreateError());
   }
 };
 
 export const getSoundByUser = async (
   req: Request,
-  res: Response
-): Promise<void> => {
+  res: Response,
+  next: NextFunction
+): ControllerResponse => {
   const { id } = req.params;
-  const userId = new ObjectId(id);
+  const userId = new ObjectId(23);
 
   try {
     const sound = await soundService.getSoundByUser(userId);
+
     res.status(201).json(sound);
   } catch (err: any) {
-    res.status(400).json({ message: err.message });
+    return next(new SoundServiceError());
   }
 };
 
 export const getManySounds = async (
   _: Request,
-  res: Response
-): Promise<void> => {
+  res: Response,
+  next: NextFunction
+): ControllerResponse => {
   try {
     const sounds = await soundService.getManySounds();
     res.status(201).json(sounds);
   } catch (err: any) {
-    res.status(400).json({ message: err.message });
+    return next(new SoundServiceError());
   }
 };

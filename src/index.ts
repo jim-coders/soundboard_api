@@ -21,7 +21,7 @@ const port = appPort || 4000;
 app.use(express.json());
 app.use(
   cors({
-    origin: 'http://localhost:4000', // make dynamic my env vars
+    origin: 'http://localhost:5173',
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
     maxAge: 86400,
@@ -42,7 +42,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use(errorHandler);
 
 // 404 handling
-app.get('*', function (req, res) {
+app.get('*', function (_req, res) {
   return res.status(404).json('Sir, this is a Wendys');
 });
 

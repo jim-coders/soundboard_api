@@ -1,16 +1,19 @@
 import { ObjectId } from 'mongodb';
 import User, { RegisterUserInput, LoginUserInput, IUser } from './User.model';
 
-type UserWithToken = { user: IUser; token: string };
+export type UserWithToken = { user: Omit<IUser, 'password'>; token: string };
 
 const registerUser = async ({
   username,
   email,
   password,
 }: RegisterUserInput): Promise<UserWithToken | null> => {
-  const existingUser = await User.findOne({ email });
+  const userByEmail = await User.findOne({ email });
+  const userByUsername = await User.findOne({ username });
 
-  if (existingUser) return null;
+  // TODO: nice to have - hit endpoint (in frontend) to check if username is taken
+
+  if (userByEmail || userByUsername) return null;
 
   const user = new User({ username, email, password });
   const token = user.generateAuthToken();
