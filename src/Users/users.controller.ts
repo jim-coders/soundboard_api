@@ -81,3 +81,25 @@ export const getManyUsers = async (
     return next(new UserServiceError());
   }
 };
+
+// export const getCurrentUser = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ): ControllerResponse => {
+//   try {
+//     const userId = req.user?._id;
+//     if (!userId) {
+//       return next(new UserNotFound('User not authenticated'));
+//     }
+
+//     const user = await userService.getUserById(new ObjectId(userId.toString()));
+//     if (!user) {
+//       return next(new UserNotFound());
+//     }
+
+//     return res.status(200).json(user);
+//   } catch (err: any) {
+//     return next(new UserServiceError(err.message));
+//   }
+// };

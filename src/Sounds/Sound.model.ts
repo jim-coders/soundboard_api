@@ -3,16 +3,18 @@ const { Schema } = mongoose;
 
 export interface ISound extends Document {
   description: string;
-  duration: string;
+  duration?: string;
   metadata: {
     s3Key: string;
     bucketName: string;
     fileType: string;
+    fileSize: number; // in bytes
   };
   title: string;
   user: mongoose.Types.ObjectId;
   createdAt: Date;
   __v?: number;
+  getUrl(): string; // Method to get the S3 URL
 }
 
 export type BaseSoundInput = Partial<
@@ -20,20 +22,34 @@ export type BaseSoundInput = Partial<
 >;
 
 export type CreateSoundInput = Required<
-  Pick<BaseSoundInput, 'description' | 'title' | 'metadata'>
+  Pick<ISound, 'description' | 'title' | 'metadata'>
 >;
 
 const SoundSchema = new Schema({
   description: {
     type: String,
+    required: true,
   },
   duration: {
-    type: String, // Duration in seconds
+    type: String,
   },
   metadata: {
-    s3Key: String, // The unique key for the sound in the S3 bucket
-    bucketName: String, // The name of the S3 bucket
-    fileType: String, // MIME type of the file (e.g., 'audio/mpeg', 'audio/wav')
+    s3Key: {
+      type: String,
+      required: true,
+    },
+    bucketName: {
+      type: String,
+      required: true,
+    },
+    fileType: {
+      type: String,
+      required: true,
+    },
+    fileSize: {
+      type: Number,
+      required: true,
+    },
   },
   title: {
     type: String,
@@ -50,6 +66,11 @@ const SoundSchema = new Schema({
   },
   __v: { type: Number, select: false },
 });
+
+// Method to generate the S3 URL for the sound
+SoundSchema.methods.getUrl = function (): string {
+  return `https://${this.metadata.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${this.metadata.s3Key}`;
+};
 
 const Sound = mongoose.model<ISound>('Sound', SoundSchema);
 

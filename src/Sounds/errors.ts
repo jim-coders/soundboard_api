@@ -13,3 +13,17 @@ export class SoundServiceError extends CustomError {
     this.name = 'SoundServiceError';
   }
 }
+
+export class MissingFileTypeError extends CustomError {
+  constructor(message: string = 'Missing file type') {
+    super(message, 400);
+    this.name = 'MissingFileTypeError';
+  }
+}
+
+export class MissingFileNameError extends CustomError {
+  constructor(message: string = 'Missing file name') {
+    super(message, 400);
+    this.name = 'MissingFileNameError';
+  }
+}
