@@ -16,7 +16,12 @@ export const postSounds = async (
   res: Response,
   next: NextFunction
 ): ControllerResponse => {
-  const { description, title, metadata, userId } = req.body;
+  const { description, title, metadata } = req.body;
+  const userId = (req.user as any)?._id;
+
+  if (!userId) {
+    return next(new SoundCreateError('User not authenticated'));
+  }
 
   // Validate required fields
   if (!description || !title) {

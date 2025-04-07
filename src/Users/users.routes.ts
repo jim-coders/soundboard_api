@@ -4,7 +4,7 @@ import {
   getUserById,
   getManyUsers,
   userLogin,
-  // getCurrentUser,
+  getCurrentUser,
 } from './users.controller';
 import authHandler from '../middlewares/authHandler';
 
@@ -15,7 +15,7 @@ router.post('/login', userLogin);
 router.post('/register', registerUsers);
 
 // Protected routes
-// router.get('/me', authHandler, getCurrentUser);
+router.get('/me', authHandler, getCurrentUser);
 router.get('/', authHandler, getManyUsers);
 router.get('/:id', authHandler, getUserById);
 
