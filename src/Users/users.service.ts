@@ -1,42 +1,40 @@
 import { ObjectId } from 'mongodb';
-import User, { RegisterUserInput, LoginUserInput, IUser } from './User.model';
+import User, { IUser } from './User.model';
 
-export type UserWithToken = { user: Omit<IUser, 'password'>; token: string };
+// TODO: nice to have - hit endpoint (in frontend) to check if username is taken
 
-const registerUser = async ({
-  username,
-  email,
-  password,
-}: RegisterUserInput): Promise<UserWithToken | null> => {
-  const userByEmail = await User.findOne({ email });
-  const userByUsername = await User.findOne({ username });
+const createUser = async (
+  username: string,
+  email: string,
+  password: string
+): Promise<IUser> => {
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new Error('User already exists');
+  }
 
-  // TODO: nice to have - hit endpoint (in frontend) to check if username is taken
+  const user = new User({
+    username,
+    email,
+    password,
+  });
 
-  if (userByEmail || userByUsername) return null;
-
-  const user = new User({ username, email, password });
-  const token = user.generateAuthToken();
   await user.save();
-
-  return { user, token };
+  return user;
 };
 
-const getUserByEmail = async ({
-  email,
-  password,
-}: LoginUserInput): Promise<UserWithToken | null> => {
+const loginUser = async (email: string, password: string): Promise<IUser> => {
   const user = await User.findOne({ email }).select('+password');
-
-  if (!user) return null;
+  if (!user) {
+    throw new Error('Invalid credentials');
+  }
 
   const isMatch = await user.comparePassword(password);
+  if (!isMatch) {
+    throw new Error('Invalid credentials');
+  }
 
-  if (!isMatch) return null;
-
-  const token = user.generateAuthToken();
-
-  return { user, token };
+  return user;
 };
 
 const getUserById = async (userId: ObjectId): Promise<IUser | null> => {
@@ -47,4 +45,9 @@ const getManyUsers = async (): Promise<Array<IUser>> => {
   return User.find();
 };
 
-export default { getUserById, getUserByEmail, getManyUsers, registerUser };
+export default {
+  createUser,
+  loginUser,
+  getUserById,
+  getManyUsers,
+};

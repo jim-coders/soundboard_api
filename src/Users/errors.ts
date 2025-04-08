@@ -27,3 +27,10 @@ export class UserServiceError extends CustomError {
     this.name = 'UserServiceError';
   }
 }
+
+export class UserCreateError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'UserCreateError';
+  }
+}

@@ -1,15 +1,10 @@
 import { ObjectId } from 'mongodb';
 import { NextFunction, Request, Response } from 'express';
 import { ControllerResponse } from '../types';
-import {
-  InvalidCredentials,
-  UserAlreadyRegistered,
-  UserNotFound,
-  UserServiceError,
-} from './errors';
+import { UserNotFound, UserServiceError, UserCreateError } from './errors';
 import userService from './users.service';
 
-export const registerUsers = async (
+export const postUsers = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -17,23 +12,31 @@ export const registerUsers = async (
   const { username, email, password } = req.body;
 
   try {
-    const newUser = await userService.registerUser({
-      username,
-      email,
-      password,
+    const user = await userService.createUser(username, email, password);
+    const token = user.generateAuthToken();
+
+    // Set the token in an HttpOnly cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
-    if (!newUser) {
-      throw new UserAlreadyRegistered();
-    }
-
-    return res.status(201).json(newUser);
+    return res.status(201).json({
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        createdAt: user.createdAt,
+      },
+    });
   } catch (err: any) {
-    return next(err);
+    return next(new UserCreateError(err.message));
   }
 };
 
-export const userLogin = async (
+export const loginUser = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -41,15 +44,27 @@ export const userLogin = async (
   const { email, password } = req.body;
 
   try {
-    const user = await userService.getUserByEmail({ email, password });
+    const user = await userService.loginUser(email, password);
+    const token = user.generateAuthToken();
 
-    if (!user) {
-      throw new InvalidCredentials();
-    }
+    // Set the token in an HttpOnly cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    });
 
-    return res.status(200).json({ user });
+    return res.json({
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        createdAt: user.createdAt,
+      },
+    });
   } catch (err: any) {
-    return next(err);
+    return next(new UserServiceError(err.message));
   }
 };
 
@@ -102,6 +117,25 @@ export const getCurrentUser = async (
     }
 
     return res.status(200).json(user);
+  } catch (err: any) {
+    return next(new UserServiceError(err.message));
+  }
+};
+
+export const logoutUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): ControllerResponse => {
+  try {
+    // Clear the token cookie
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+
+    return res.status(200).json({ message: 'Logged out successfully' });
   } catch (err: any) {
     return next(new UserServiceError(err.message));
   }
