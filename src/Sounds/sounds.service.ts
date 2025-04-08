@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import Sound, { CreateSoundInput, ISound } from './Sound.model';
-import { deleteObject } from '../services/s3.service';
+import { deleteObject, listObjects } from '../services/s3.service';
+import { S3Error } from '../types/errors';
 
 const createSound = async (
   sound: CreateSoundInput,
@@ -56,12 +57,65 @@ const deleteSound = async (soundId: string): Promise<void> => {
   try {
     await deleteObject(sound.metadata.s3Key);
   } catch (error) {
-    console.error('Failed to delete from S3:', error);
-    // Continue with deletion from database even if S3 deletion fails
+    if (error instanceof S3Error) {
+      console.error('Failed to delete from S3:', error.message);
+      // Continue with deletion from database even if S3 deletion fails
+    } else {
+      throw error;
+    }
   }
 
   // Delete from database
   await Sound.findByIdAndDelete(soundId);
 };
 
-export default { createSound, getSoundByUser, getManySounds, deleteSound };
+const cleanupOrphanedFiles = async (): Promise<{
+  deleted: string[];
+  errors: string[];
+}> => {
+  try {
+    // Get all sounds from database
+    const sounds = await Sound.find();
+    const validS3Keys = new Set(sounds.map((sound) => sound.metadata.s3Key));
+
+    // Get all files from S3
+    const s3Files = await listObjects();
+
+    // Find orphaned files (files in S3 but not in database)
+    const orphanedFiles = s3Files.filter((key) => !validS3Keys.has(key));
+
+    const deleted: string[] = [];
+    const errors: string[] = [];
+
+    // Delete orphaned files
+    for (const key of orphanedFiles) {
+      try {
+        await deleteObject(key);
+        deleted.push(key);
+      } catch (error) {
+        if (error instanceof S3Error) {
+          console.error(
+            `Failed to delete orphaned file ${key}:`,
+            error.message
+          );
+          errors.push(key);
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    return { deleted, errors };
+  } catch (error) {
+    console.error('Error cleaning up orphaned files:', error);
+    throw new Error('Failed to clean up orphaned files');
+  }
+};
+
+export default {
+  createSound,
+  getSoundByUser,
+  getManySounds,
+  deleteSound,
+  cleanupOrphanedFiles,
+};
