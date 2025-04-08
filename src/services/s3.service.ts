@@ -2,6 +2,7 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import crypto from 'crypto';
@@ -57,5 +58,20 @@ export const deleteObject = async (key: string): Promise<void> => {
   } catch (error) {
     console.error('Error deleting object from S3:', error);
     throw new Error('Failed to delete object from S3');
+  }
+};
+
+export const generateReadUrl = async (key: string): Promise<string> => {
+  const command = new GetObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: key,
+  });
+
+  try {
+    const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    return url;
+  } catch (error) {
+    console.error('Error generating read URL:', error);
+    throw new Error('Failed to generate read URL');
   }
 };

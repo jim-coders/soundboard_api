@@ -8,8 +8,9 @@ import {
   MissingFileTypeError,
   MissingFileNameError,
 } from './errors';
-import { generateUploadUrl } from '../services/s3.service';
+import { generateUploadUrl, generateReadUrl } from '../services/s3.service';
 import { CreateSoundInput } from './Sound.model';
+import Sound from './Sound.model';
 
 export const postSounds = async (
   req: Request,
@@ -132,5 +133,25 @@ export const deleteSound = async (
     return res.status(204).send();
   } catch (err: any) {
     return next(new SoundServiceError('Failed to delete sound'));
+  }
+};
+
+export const getSoundUrl = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): ControllerResponse => {
+  const { id } = req.params;
+
+  try {
+    const sound = await Sound.findById(id);
+    if (!sound) {
+      return next(new SoundServiceError('Sound not found'));
+    }
+
+    const url = await generateReadUrl(sound.metadata.s3Key);
+    return res.json({ url });
+  } catch (error: any) {
+    return next(new SoundServiceError(error.message));
   }
 };
