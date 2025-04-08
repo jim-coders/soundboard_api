@@ -24,26 +24,6 @@ export const postSounds = async (
     return next(new SoundCreateError('User not authenticated'));
   }
 
-  // Validate required fields
-  if (!description || !title) {
-    return next(
-      new SoundCreateError(
-        'Missing required fields: description and title are required'
-      )
-    );
-  }
-
-  // Validate metadata
-  if (
-    !metadata ||
-    !metadata.s3Key ||
-    !metadata.bucketName ||
-    !metadata.fileType ||
-    !metadata.fileSize
-  ) {
-    return next(new SoundCreateError('Missing required metadata fields'));
-  }
-
   try {
     const soundInput: CreateSoundInput = {
       description,
@@ -58,7 +38,7 @@ export const postSounds = async (
 
     const userSound = await soundService.createSound(
       soundInput,
-      new ObjectId(userId as string) // TODO: fix this by typing the userId from the request
+      new ObjectId(userId as string)
     );
     return res.status(201).json(userSound);
   } catch (err: any) {
