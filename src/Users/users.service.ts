@@ -1,7 +1,6 @@
 import { ObjectId } from 'mongodb';
 import User, { IUser } from './User.model';
 import { UserCreateError } from './errors';
-import bcrypt from 'bcryptjs';
 
 // TODO: nice to have - hit endpoint (in frontend) to check if username is taken
 
@@ -15,11 +14,10 @@ const createUser = async (
     throw new UserCreateError('User already exists');
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
   const user = await User.create({
     username,
     email,
-    password: hashedPassword,
+    password, // Let the pre-save hook handle the hashing
   });
 
   return user;
