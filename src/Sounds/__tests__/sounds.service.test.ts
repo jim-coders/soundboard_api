@@ -29,16 +29,12 @@ const mockSoundData = {
 
 // Mock Sound model
 jest.mock('../Sound.model', () => {
-  const findById = jest.fn() as jest.Mock & { populate: jest.Mock };
   const find = jest.fn() as jest.Mock & { populate: jest.Mock };
+  const findOne = jest.fn() as jest.Mock;
+  const findById = jest.fn() as jest.Mock & { populate: jest.Mock };
   const findByIdAndDelete = jest.fn() as jest.Mock;
   const populate = jest.fn() as jest.Mock;
   const save = jest.fn() as jest.Mock;
-
-  // Create a chainable query object
-  const createChainableQuery = (resolveValue: any) => ({
-    populate: jest.fn().mockResolvedValue(resolveValue),
-  });
 
   const MockSound = jest.fn().mockImplementation((data) => ({
     ...data,
@@ -46,12 +42,14 @@ jest.mock('../Sound.model', () => {
     save,
   })) as jest.Mock & {
     findById: typeof findById;
+    findOne: typeof findOne;
     find: typeof find;
     findByIdAndDelete: typeof findByIdAndDelete;
     populate: typeof populate;
   };
 
   MockSound.findById = findById;
+  MockSound.findOne = findOne;
   MockSound.find = find;
   MockSound.findByIdAndDelete = findByIdAndDelete;
   MockSound.populate = populate;
@@ -220,7 +218,7 @@ describe('Sounds Service', () => {
       (Sound.find as jest.Mock).mockReturnThis();
       (Sound.populate as jest.Mock).mockResolvedValue(mockSounds);
 
-      const result = await SoundsService.getManySounds();
+      const result = await SoundsService.getManySounds(mockUserId);
 
       expect(Sound.find).toHaveBeenCalled();
       expect(Sound.populate).toHaveBeenCalledWith(
@@ -232,7 +230,7 @@ describe('Sounds Service', () => {
   });
 
   describe('deleteSound', () => {
-    it('should delete a sound', async () => {
+    fit('should delete a sound', async () => {
       const soundId = '123';
       const mockSound = {
         _id: soundId,
@@ -247,12 +245,15 @@ describe('Sounds Service', () => {
         user: mockUserId,
       };
 
-      (Sound.findById as jest.Mock).mockResolvedValue(mockSound);
+      (Sound.findOne as jest.Mock).mockResolvedValue(mockSound);
       (Sound.findByIdAndDelete as jest.Mock).mockResolvedValue(mockSound);
 
-      await SoundsService.deleteSound(soundId);
+      await SoundsService.deleteSound(soundId, mockUserId);
 
-      expect(Sound.findById).toHaveBeenCalledWith(soundId);
+      expect(Sound.findOne).toHaveBeenCalledWith({
+        _id: soundId,
+        user: mockUserId,
+      });
       expect(Sound.findByIdAndDelete).toHaveBeenCalledWith(soundId);
       expect(s3Service.deleteObject).toHaveBeenCalledWith(
         mockSound.metadata.s3Key
@@ -263,9 +264,9 @@ describe('Sounds Service', () => {
       const soundId = '123';
       (Sound.findById as jest.Mock).mockResolvedValue(null);
 
-      await expect(SoundsService.deleteSound(soundId)).rejects.toThrow(
-        'Sound not found'
-      );
+      await expect(
+        SoundsService.deleteSound(soundId, mockUserId)
+      ).rejects.toThrow('Sound not found');
     });
   });
 });

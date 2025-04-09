@@ -41,12 +41,15 @@ const getSoundByUser = async (
   });
 };
 
-const getManySounds = async (): Promise<Array<ISound>> => {
-  return Sound.find().populate('user', '-_id username email');
+const getManySounds = async (userId: ObjectId): Promise<Array<ISound>> => {
+  return Sound.find({ user: userId }).populate('user', '-_id username email');
 };
 
-const deleteSound = async (soundId: string): Promise<void> => {
-  const sound = await Sound.findById(soundId);
+const deleteSound = async (
+  soundId: string,
+  userId: ObjectId
+): Promise<void> => {
+  const sound = await Sound.findOne({ _id: soundId, user: userId });
 
   if (!sound) {
     throw new Error('Sound not found');

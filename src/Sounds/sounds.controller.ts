@@ -58,7 +58,7 @@ export const postSounds = async (
 
     const userSound = await soundService.createSound(
       soundInput,
-      new ObjectId(userId as string) // TODO: fix this by typing the userId from the request
+      new ObjectId(userId as string)
     );
     return res.status(201).json(userSound);
   } catch (err: any) {
@@ -76,7 +76,6 @@ export const getSoundByUser = async (
 
   try {
     const sound = await soundService.getSoundByUser(userId);
-
     res.status(201).json(sound);
   } catch (err: any) {
     return next(new SoundServiceError());
@@ -84,17 +83,26 @@ export const getSoundByUser = async (
 };
 
 export const getManySounds = async (
-  _: Request,
+  req: Request,
   res: Response,
   next: NextFunction
 ): ControllerResponse => {
+  const userId = (req.user as any)?._id;
+
+  if (!userId) {
+    return next(new SoundServiceError('User not authenticated'));
+  }
+
   try {
-    const sounds = await soundService.getManySounds();
+    const sounds = await soundService.getManySounds(
+      new ObjectId(userId as string)
+    );
     res.status(200).json(sounds);
   } catch (err: any) {
     return next(new SoundServiceError());
   }
 };
+
 export const getUploadUrl = async (
   req: Request,
   res: Response,
@@ -121,15 +129,21 @@ export const getUploadUrl = async (
     return next(new SoundServiceError(error.message));
   }
 };
+
 export const deleteSound = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): ControllerResponse => {
   const { id } = req.params;
+  const userId = (req.user as any)?._id;
+
+  if (!userId) {
+    return next(new SoundServiceError('User not authenticated'));
+  }
 
   try {
-    await soundService.deleteSound(id);
+    await soundService.deleteSound(id, new ObjectId(userId as string));
     return res.status(204).send();
   } catch (err: any) {
     return next(new SoundServiceError('Failed to delete sound'));
@@ -142,16 +156,22 @@ export const getSoundUrl = async (
   next: NextFunction
 ): ControllerResponse => {
   const { id } = req.params;
+  const userId = (req.user as any)?._id;
+
+  if (!userId) {
+    return next(new SoundServiceError('User not authenticated'));
+  }
 
   try {
-    const sound = await Sound.findById(id);
+    const sound = await Sound.findOne({ _id: id, user: new ObjectId(userId) });
     if (!sound) {
       return next(new SoundServiceError('Sound not found'));
     }
 
+    // Generate a presigned URL for the sound file
     const url = await generateReadUrl(sound.metadata.s3Key);
     return res.json({ url });
-  } catch (error: any) {
-    return next(new SoundServiceError(error.message));
+  } catch (err: any) {
+    return next(new SoundServiceError('Failed to get sound URL'));
   }
 };

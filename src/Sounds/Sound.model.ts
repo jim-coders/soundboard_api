@@ -14,7 +14,6 @@ export interface ISound extends Document {
   user: mongoose.Types.ObjectId;
   createdAt: Date;
   __v?: number;
-  getUrl(): string; // Method to get the S3 URL
 }
 
 export type BaseSoundInput = Partial<
@@ -66,11 +65,6 @@ const SoundSchema = new Schema({
   },
   __v: { type: Number, select: false },
 });
-
-// Method to generate the S3 URL for the sound
-SoundSchema.methods.getUrl = function (): string {
-  return `https://${this.metadata.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${this.metadata.s3Key}`;
-};
 
 const Sound = mongoose.model<ISound>('Sound', SoundSchema);
 
