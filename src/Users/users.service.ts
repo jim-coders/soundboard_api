@@ -1,5 +1,7 @@
 import { ObjectId } from 'mongodb';
 import User, { IUser } from './User.model';
+import { UserCreateError } from './errors';
+import bcrypt from 'bcryptjs';
 
 // TODO: nice to have - hit endpoint (in frontend) to check if username is taken
 
@@ -10,16 +12,16 @@ const createUser = async (
 ): Promise<IUser> => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    throw new Error('User already exists');
+    throw new UserCreateError('User already exists');
   }
 
-  const user = new User({
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = await User.create({
     username,
     email,
-    password,
+    password: hashedPassword,
   });
 
-  await user.save();
   return user;
 };
 
