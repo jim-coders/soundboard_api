@@ -47,14 +47,6 @@ export const loginUser = async (
     const user = await userService.loginUser(email, password);
     const token = user.generateAuthToken();
 
-    // Set the token in an HttpOnly cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    });
-
     return res.json({
       user: {
         _id: user._id,
@@ -62,6 +54,7 @@ export const loginUser = async (
         email: user.email,
         createdAt: user.createdAt,
       },
+      token,
     });
   } catch (err: any) {
     return next(new UserServiceError(err.message));

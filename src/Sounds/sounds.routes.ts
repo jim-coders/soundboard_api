@@ -1,23 +1,19 @@
 import { Router } from 'express';
 import {
   postSounds,
-  getManySounds,
   getSoundByUser,
+  getManySounds,
+  getUploadUrl,
   getSoundUrl,
   deleteSound,
-  getUploadUrl,
 } from './sounds.controller';
-import validateSoundUpload from '../middlewares/validateSound';
 
-const router = Router();
-
-// Sound routes
+const router: Router = Router();
 router.get('/', getManySounds);
 router.get('/users/:id', getSoundByUser);
-router.get('/:id', getSoundByUser);
-router.get('/:id/url', getSoundUrl);
+router.post('/', postSounds);
 router.get('/upload-url', getUploadUrl);
-router.post('/', validateSoundUpload, postSounds);
+router.get('/:id/url', getSoundUrl);
 router.delete('/:id', deleteSound);
 
 export default router;

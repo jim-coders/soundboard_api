@@ -14,37 +14,23 @@ export class InvalidCredentials extends CustomError {
   }
 }
 
-export class UserNotFound extends Error {
-  constructor(message = 'User not found') {
-    super(message);
+export class UserNotFound extends CustomError {
+  constructor(message: string = 'User not found') {
+    super(message, 404);
     this.name = 'UserNotFound';
   }
 }
 
-export class UserServiceError extends Error {
-  constructor(message = 'An error occurred while processing your request') {
-    super(message);
+export class UserServiceError extends CustomError {
+  constructor(message: string = 'Something went wrong with the user service') {
+    super(message, 500);
     this.name = 'UserServiceError';
   }
 }
 
 export class UserCreateError extends Error {
-  constructor(message = 'Failed to create user') {
+  constructor(message: string) {
     super(message);
     this.name = 'UserCreateError';
-  }
-}
-
-export class AuthenticationError extends Error {
-  constructor(message = 'Invalid credentials') {
-    super(message);
-    this.name = 'AuthenticationError';
-  }
-}
-
-export class ValidationError extends Error {
-  constructor(message = 'Invalid input data') {
-    super(message);
-    this.name = 'ValidationError';
   }
 }
