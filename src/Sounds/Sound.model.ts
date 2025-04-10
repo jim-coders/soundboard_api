@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 export interface ISound extends Document {
-  description: string;
+  description?: string;
   duration?: string;
   metadata: {
     s3Key: string;
@@ -27,7 +27,6 @@ export type CreateSoundInput = Required<
 const SoundSchema = new Schema({
   description: {
     type: String,
-    required: true,
   },
   duration: {
     type: String,

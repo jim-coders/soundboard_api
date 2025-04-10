@@ -25,11 +25,9 @@ export const postSounds = async (
   }
 
   // Validate required fields
-  if (!description || !title) {
+  if (!title) {
     return next(
-      new SoundCreateError(
-        'Missing required fields: description and title are required'
-      )
+      new SoundCreateError('Missing required field: title is required')
     );
   }
 
