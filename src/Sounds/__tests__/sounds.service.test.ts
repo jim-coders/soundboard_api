@@ -230,7 +230,7 @@ describe('Sounds Service', () => {
   });
 
   describe('deleteSound', () => {
-    fit('should delete a sound', async () => {
+    it('should delete a sound', async () => {
       const soundId = '123';
       const mockSound = {
         _id: soundId,
@@ -262,7 +262,7 @@ describe('Sounds Service', () => {
 
     it('should throw error when sound not found', async () => {
       const soundId = '123';
-      (Sound.findById as jest.Mock).mockResolvedValue(null);
+      (Sound.findOne as jest.Mock).mockResolvedValue(null);
 
       await expect(
         SoundsService.deleteSound(soundId, mockUserId)
