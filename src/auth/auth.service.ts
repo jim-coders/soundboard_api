@@ -15,7 +15,7 @@ export class AuthService {
 
     // Generate JWT token
     const token = jwt.sign(
-      { username: user.username, sub: user._id },
+      { userId: user._id, username: user.username },
       process.env.JWT_SECRET!,
       { expiresIn: '1h' }
     );
@@ -49,11 +49,11 @@ export class AuthService {
   ): Promise<{ userId: ObjectId; username: string }> {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-        sub: string;
+        userId: string;
         username: string;
       };
       return {
-        userId: new ObjectId(decoded.sub),
+        userId: new ObjectId(decoded.userId),
         username: decoded.username,
       };
     } catch (error) {

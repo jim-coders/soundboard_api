@@ -8,7 +8,6 @@ export interface IUser extends Document {
   username: string;
   email: string;
   password: string;
-  favorites: mongoose.Types.ObjectId[];
   comparePassword(candidatePassword: string): Promise<boolean>;
   generateAuthToken(): string;
   createdAt: Date;
@@ -16,7 +15,7 @@ export interface IUser extends Document {
 }
 
 export type BaseUserInput = Partial<
-  Pick<IUser, 'username' | 'email' | 'password' | 'favorites'>
+  Pick<IUser, 'username' | 'email' | 'password'>
 >;
 
 export type RegisterUserInput = Required<
@@ -36,12 +35,6 @@ const UserSchema: Schema<IUser> = new Schema(
       trim: true,
       match: [/.+@.+\..+/, 'Please enter a valid email address'],
     },
-    favorites: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'Sound',
-      },
-    ],
     password: {
       type: String,
       required: true,
@@ -89,16 +82,7 @@ UserSchema.methods.generateAuthToken = function () {
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string
 ) {
-  const user = await mongoose
-    .model<IUser>('User')
-    .findById(this._id)
-    .select('+password');
-
-  if (!user) {
-    throw new Error('User not found');
-  }
-
-  return bcrypt.compare(candidatePassword, user.password);
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 const User = mongoose.model<IUser>('User', UserSchema);

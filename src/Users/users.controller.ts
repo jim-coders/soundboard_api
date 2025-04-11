@@ -15,9 +15,15 @@ export const postUsers = async (
   const { username, email, password } = req.body;
 
   try {
-    await userService.createUser(username, email, password);
-    const result = await authService.login(email, password, res);
-    return res.status(201).json(result);
+    const user = await userService.createUser(username, email, password);
+    return res.status(201).json({
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        createdAt: user.createdAt,
+      },
+    });
   } catch (err: any) {
     return next(new UserCreateError(err.message));
   }
