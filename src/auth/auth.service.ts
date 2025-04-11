@@ -1,26 +1,24 @@
 import jwt from 'jsonwebtoken';
 import UserService from '../Users/users.service';
 import { Response } from 'express';
+import { ObjectId } from 'mongodb';
 
 export class AuthService {
   constructor(private userService: typeof UserService) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.userService.loginUser(username, password);
-    if (user) {
-      const { password, ...result } = user;
-      return result;
+  async login(email: string, password: string, res: Response) {
+    // Validate user credentials
+    const user = await this.userService.getUserByEmail(email);
+    if (!user || !(await user.comparePassword(password))) {
+      throw new Error('Invalid credentials');
     }
-    return null;
-  }
 
-  async login(user: any, res: Response) {
-    const payload = { username: user.username, sub: user._id };
-
-    // Generate JWT token (keeping existing functionality)
-    const token = jwt.sign(payload, process.env.JWT_SECRET!, {
-      expiresIn: '1h',
-    });
+    // Generate JWT token
+    const token = jwt.sign(
+      { username: user.username, sub: user._id },
+      process.env.JWT_SECRET!,
+      { expiresIn: '1h' }
+    );
 
     // Set HTTP-only cookie
     res.cookie('auth_token', token, {
@@ -30,12 +28,36 @@ export class AuthService {
       maxAge: 60 * 60 * 1000, // 1 hour
     });
 
-    return { token, message: 'Login successful' };
+    // Return only user data
+    return {
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        createdAt: user.createdAt,
+      },
+    };
   }
 
   async logout(res: Response) {
-    // Clear both token and cookie
     res.clearCookie('auth_token');
     return { message: 'Logout successful' };
+  }
+
+  async validateToken(
+    token: string
+  ): Promise<{ userId: ObjectId; username: string }> {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+        sub: string;
+        username: string;
+      };
+      return {
+        userId: new ObjectId(decoded.sub),
+        username: decoded.username,
+      };
+    } catch (error) {
+      throw new Error('Invalid token');
+    }
   }
 }

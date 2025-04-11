@@ -70,54 +70,30 @@ describe('User Service', () => {
     });
   });
 
-  describe('loginUser', () => {
-    it('should login user with valid credentials', async () => {
+  describe('getUserByEmail', () => {
+    it('should return user by email', async () => {
       const mockUser = {
         _id: '123',
         email: 'test@example.com',
         password: 'hashedPassword',
-        comparePassword: jest.fn().mockResolvedValue(true),
       };
 
-      (User.findOne as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockResolvedValue(mockUser),
-      }));
+      (User.findOne as jest.Mock).mockResolvedValue(mockUser);
 
-      const result = await UsersService.loginUser(
-        'test@example.com',
-        'password123'
-      );
+      const result = await UsersService.getUserByEmail('test@example.com');
 
       expect(User.findOne).toHaveBeenCalledWith({ email: 'test@example.com' });
-      expect(mockUser.comparePassword).toHaveBeenCalledWith('password123');
       expect(result).toEqual(mockUser);
     });
 
-    it('should throw error when user not found', async () => {
-      (User.findOne as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockResolvedValue(null),
-      }));
+    it('should return null when user not found', async () => {
+      (User.findOne as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        UsersService.loginUser('test@example.com', 'password123')
-      ).rejects.toThrow('Invalid credentials');
-    });
+      const result = await UsersService.getUserByEmail(
+        'nonexistent@example.com'
+      );
 
-    it('should throw error when password is invalid', async () => {
-      const mockUser = {
-        _id: '123',
-        email: 'test@example.com',
-        password: 'hashedPassword',
-        comparePassword: jest.fn().mockResolvedValue(false),
-      };
-
-      (User.findOne as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockResolvedValue(mockUser),
-      }));
-
-      await expect(
-        UsersService.loginUser('test@example.com', 'wrongpassword')
-      ).rejects.toThrow('Invalid credentials');
+      expect(result).toBeNull();
     });
   });
 

@@ -3,6 +3,9 @@ import { NextFunction, Request, Response } from 'express';
 import { ControllerResponse } from '../types';
 import { UserNotFound, UserServiceError, UserCreateError } from './errors';
 import userService from './users.service';
+import { AuthService } from '../auth/auth.service';
+
+const authService = new AuthService(userService);
 
 export const postUsers = async (
   req: Request,
@@ -13,24 +16,8 @@ export const postUsers = async (
 
   try {
     const user = await userService.createUser(username, email, password);
-    const token = user.generateAuthToken();
-
-    // Set the token in an HttpOnly cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    });
-
-    return res.status(201).json({
-      user: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        createdAt: user.createdAt,
-      },
-    });
+    const result = await authService.login(email, password, res);
+    return res.status(201).json(result);
   } catch (err: any) {
     return next(new UserCreateError(err.message));
   }
@@ -44,26 +31,8 @@ export const loginUser = async (
   const { email, password } = req.body;
 
   try {
-    const user = await userService.loginUser(email, password);
-    const token = user.generateAuthToken();
-
-    // Set the token in an HttpOnly cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    });
-
-    return res.json({
-      user: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        createdAt: user.createdAt,
-      },
-      token, // Still return token during transition
-    });
+    const result = await authService.login(email, password, res);
+    return res.json(result);
   } catch (err: any) {
     return next(new Error('Invalid credentials'));
   }
@@ -129,14 +98,8 @@ export const logoutUser = async (
   next: NextFunction
 ): ControllerResponse => {
   try {
-    // Clear the token cookie
-    res.clearCookie('token', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    });
-
-    return res.status(200).json({ message: 'Logged out successfully' });
+    const result = await authService.logout(res);
+    return res.json(result);
   } catch (err: any) {
     return next(new UserServiceError(err.message));
   }

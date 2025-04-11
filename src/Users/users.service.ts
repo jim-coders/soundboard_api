@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import User, { IUser } from './User.model';
+import bcrypt from 'bcrypt';
 import { UserCreateError } from './errors';
 
 // TODO: nice to have - hit endpoint (in frontend) to check if username is taken
@@ -14,27 +15,17 @@ const createUser = async (
     throw new UserCreateError('User already exists');
   }
 
+  const hashedPassword = await bcrypt.hash(password, 10);
   const user = await User.create({
     username,
     email,
-    password, // Let the pre-save hook handle the hashing
+    password: hashedPassword,
   });
-
   return user;
 };
 
-const loginUser = async (email: string, password: string): Promise<IUser> => {
-  const user = await User.findOne({ email }).select('+password');
-  if (!user) {
-    throw new Error('Invalid credentials');
-  }
-
-  const isMatch = await user.comparePassword(password);
-  if (!isMatch) {
-    throw new Error('Invalid credentials');
-  }
-
-  return user;
+const getUserByEmail = async (email: string): Promise<IUser | null> => {
+  return User.findOne({ email });
 };
 
 const getUserById = async (userId: ObjectId): Promise<IUser | null> => {
@@ -42,12 +33,12 @@ const getUserById = async (userId: ObjectId): Promise<IUser | null> => {
 };
 
 const getManyUsers = async (): Promise<Array<IUser>> => {
-  return User.find();
+  return User.find({});
 };
 
 export default {
   createUser,
-  loginUser,
+  getUserByEmail,
   getUserById,
   getManyUsers,
 };
