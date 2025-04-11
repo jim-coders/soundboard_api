@@ -32,13 +32,8 @@ const getUserById = async (userId: ObjectId): Promise<IUser | null> => {
   return User.findById(userId);
 };
 
-const getManyUsers = async (): Promise<Array<IUser>> => {
-  return User.find({});
-};
-
 export default {
   createUser,
   getUserByEmail,
   getUserById,
-  getManyUsers,
 };

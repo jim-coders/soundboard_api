@@ -9,7 +9,6 @@ jest.mock('../User.model', () => {
     findOne: jest.fn(),
     create: jest.fn(),
     findById: jest.fn(),
-    find: jest.fn(),
   };
 });
 
@@ -118,22 +117,6 @@ describe('User Service', () => {
       const result = await UsersService.getUserById(new ObjectId());
 
       expect(result).toBeNull();
-    });
-  });
-
-  describe('getManyUsers', () => {
-    it('should return list of users', async () => {
-      const mockUsers = [
-        { _id: new ObjectId(), email: 'user1@example.com' },
-        { _id: new ObjectId(), email: 'user2@example.com' },
-      ];
-
-      (User.find as jest.Mock).mockResolvedValue(mockUsers);
-
-      const result = await UsersService.getManyUsers();
-
-      expect(User.find).toHaveBeenCalled();
-      expect(result).toEqual(mockUsers);
     });
   });
 });

@@ -38,50 +38,18 @@ export const loginUser = async (
   }
 };
 
-export const getUserById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): ControllerResponse => {
-  const { id } = req.params;
-  const userId = new ObjectId(id);
-
-  try {
-    const user = await userService.getUserById(userId);
-    return res.status(200).json(user);
-  } catch (err: any) {
-    return next(new UserNotFound());
-  }
-};
-
-export const getManyUsers = async (
-  _: Request,
-  res: Response,
-  next: NextFunction
-): ControllerResponse => {
-  try {
-    const user = await userService.getManyUsers();
-    return res.status(201).json(user);
-  } catch (err: any) {
-    return next(new UserServiceError());
-  }
-};
-
 export const getCurrentUser = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): ControllerResponse => {
   try {
-    // TODO: Properly type the User interface to include _id
     const userId = (req.user as any)?._id;
     if (!userId) {
       return next(new UserNotFound('User not authenticated'));
     }
 
-    const user = await userService.getUserById(
-      new ObjectId(userId.toString() as string) // TODO: fix this by typing the userId from the request
-    );
+    const user = await userService.getUserById(new ObjectId(userId));
     if (!user) {
       return next(new UserNotFound());
     }
