@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import passport from 'passport';
+import cookieParser from 'cookie-parser';
 
 import router from './routes';
 import { connectToMongoDB } from './db';
@@ -19,6 +20,7 @@ const port = appPort || 4000;
 
 // Middlewares
 app.use(express.json());
+app.use(cookieParser());
 app.use(
   cors({
     origin: 'http://localhost:5173',
