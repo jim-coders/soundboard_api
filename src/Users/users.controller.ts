@@ -15,7 +15,7 @@ export const postUsers = async (
   const { username, email, password } = req.body;
 
   try {
-    const user = await userService.createUser(username, email, password);
+    await userService.createUser(username, email, password);
     const result = await authService.login(email, password, res);
     return res.status(201).json(result);
   } catch (err: any) {
@@ -61,7 +61,7 @@ export const getCurrentUser = async (
 };
 
 export const logoutUser = async (
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction
 ): ControllerResponse => {
