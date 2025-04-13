@@ -17,7 +17,7 @@ export class AuthService {
     const token = jwt.sign(
       { userId: user._id, username: user.username },
       process.env.JWT_SECRET!,
-      { expiresIn: '1h' }
+      { expiresIn: '7d' }
     );
 
     // Set HTTP-only cookie
