@@ -9,6 +9,7 @@ import router from './routes';
 import { connectToMongoDB } from './db';
 import { appPort, passportConfig } from './config';
 import { errorHandler } from './middlewares';
+import { corsOrigin } from './config/globalConfig';
 
 dotenv.config();
 
@@ -23,7 +24,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: corsOrigin,
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
     maxAge: 86400,
