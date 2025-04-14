@@ -6,9 +6,13 @@ import { ObjectId } from 'mongodb';
 // Mock User model
 jest.mock('../User.model', () => {
   return {
-    findOne: jest.fn(),
+    findOne: jest.fn().mockImplementation(() => ({
+      select: jest.fn().mockReturnValue(null),
+    })),
     create: jest.fn(),
-    findById: jest.fn(),
+    findById: jest.fn().mockImplementation(() => ({
+      select: jest.fn().mockReturnValue(null),
+    })),
   };
 });
 
@@ -77,7 +81,9 @@ describe('User Service', () => {
         password: 'hashedPassword',
       };
 
-      (User.findOne as jest.Mock).mockResolvedValue(mockUser);
+      (User.findOne as jest.Mock).mockImplementation(() => ({
+        select: jest.fn().mockReturnValue(mockUser),
+      }));
 
       const result = await UsersService.getUserByEmail('test@example.com');
 
@@ -86,7 +92,9 @@ describe('User Service', () => {
     });
 
     it('should return null when user not found', async () => {
-      (User.findOne as jest.Mock).mockResolvedValue(null);
+      (User.findOne as jest.Mock).mockImplementation(() => ({
+        select: jest.fn().mockReturnValue(null),
+      }));
 
       const result = await UsersService.getUserByEmail(
         'nonexistent@example.com'

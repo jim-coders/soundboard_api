@@ -16,14 +16,8 @@ export const postUsers = async (
 
   try {
     const user = await userService.createUser(username, email, password);
-    return res.status(201).json({
-      user: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        createdAt: user.createdAt,
-      },
-    });
+    const result = await authService.login(email, password, res);
+    return res.status(201).json(result);
   } catch (err: any) {
     return next(new UserCreateError(err.message));
   }
