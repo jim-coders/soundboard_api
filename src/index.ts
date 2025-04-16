@@ -27,6 +27,7 @@ app.use(
     origin: corsOrigin,
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     maxAge: 86400,
   })
 );
