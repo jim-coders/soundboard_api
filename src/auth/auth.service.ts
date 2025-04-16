@@ -20,12 +20,15 @@ export class AuthService {
       { expiresIn: '7d' }
     );
 
+    const isProduction = process.env.NODE_ENV === 'production';
+
     // Set HTTP-only cookie
     res.cookie('auth_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 1000, // 1 hour
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      domain: process.env.COOKIE_DOMAIN,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days to match JWT expiration
     });
 
     // Return only user data
