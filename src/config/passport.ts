@@ -11,7 +11,15 @@ const opts: StrategyOptions = {
   jwtFromRequest: ExtractJwt.fromExtractors([
     (req) => {
       if (req && req.cookies) {
-        return req.cookies['auth_token'];
+        console.log('Cookies available:', Object.keys(req.cookies));
+        const token = req.cookies['auth_token'];
+        if (token) {
+          console.log('Token found in cookie:', token.substring(0, 20) + '...');
+          return token;
+        }
+        console.log('No auth_token in cookies');
+      } else {
+        console.log('No cookies object in request');
       }
       return null;
     },
@@ -23,12 +31,16 @@ export default (passport: PassportStatic) => {
   passport.use(
     new JwtStrategy(opts, async (jwt_payload, done) => {
       try {
+        console.log('JWT payload:', jwt_payload);
         const user = await User.findById(jwt_payload.userId);
         if (user) {
           console.log('User found:', user._id);
           return done(null, user);
         }
-        console.log('No user found for JWT payload');
+        console.log(
+          'No user found for JWT payload userId:',
+          jwt_payload.userId
+        );
         return done(null, false);
       } catch (err) {
         console.error('JWT Strategy Error:', err);
