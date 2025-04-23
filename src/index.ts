@@ -22,6 +22,7 @@ const port = appPort || 4000;
 // Middlewares
 app.use(express.json());
 app.use(cookieParser());
+app.use(helmet());
 app.use(
   cors({
     origin: corsOrigin,
@@ -32,7 +33,6 @@ app.use(
   })
 );
 console.log('CORS configured with origin:', corsOrigin);
-app.use(helmet());
 app.use(passport.initialize());
 passportConfig(passport);
 
