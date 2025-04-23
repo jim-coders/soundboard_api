@@ -10,6 +10,10 @@ import { jwtSecret } from './globalConfig';
 const opts: StrategyOptions = {
   jwtFromRequest: ExtractJwt.fromExtractors([
     (req) => {
+      console.log('Request headers:', req.headers);
+      console.log('Request origin:', req.headers.origin);
+      console.log('Request host:', req.headers.host);
+
       if (req && req.cookies) {
         console.log('Cookies available:', Object.keys(req.cookies));
         const token = req.cookies['auth_token'];
