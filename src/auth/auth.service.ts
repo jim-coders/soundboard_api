@@ -29,6 +29,7 @@ export class AuthService {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? ('none' as const) : ('lax' as const),
+      path: '/', // Ensure cookie is available for all paths
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days to match JWT expiration
     };
     console.log('Cookie options:', JSON.stringify(cookieOptions, null, 2));
