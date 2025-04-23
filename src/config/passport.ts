@@ -8,23 +8,7 @@ import User from '../Users/User.model';
 import { jwtSecret } from './globalConfig';
 
 const opts: StrategyOptions = {
-  jwtFromRequest: ExtractJwt.fromExtractors([
-    (req) => {
-      let token = null;
-      if (req && req.cookies) {
-        console.log('Cookies received:', Object.keys(req.cookies));
-        token = req.cookies['auth_token'];
-        if (!token) {
-          console.log('No auth_token cookie found');
-        } else {
-          console.log('Auth token found in cookie');
-        }
-      } else {
-        console.log('No cookies object in request');
-      }
-      return token;
-    },
-  ]),
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: jwtSecret,
 };
 
