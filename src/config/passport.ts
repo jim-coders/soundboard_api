@@ -8,7 +8,14 @@ import User from '../Users/User.model';
 import { jwtSecret } from './globalConfig';
 
 const opts: StrategyOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: ExtractJwt.fromExtractors([
+    (req) => {
+      if (req && req.cookies) {
+        return req.cookies['auth_token'];
+      }
+      return null;
+    },
+  ]),
   secretOrKey: jwtSecret,
 };
 
