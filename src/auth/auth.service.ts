@@ -10,6 +10,7 @@ export class AuthService {
     // Validate user credentials
     const user = await this.userService.getUserByEmail(email);
     if (!user || !(await user.comparePassword(password))) {
+      console.log('Authentication failed for:', email);
       throw new Error('Invalid credentials');
     }
 
@@ -27,7 +28,6 @@ export class AuthService {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
-      domain: process.env.COOKIE_DOMAIN,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days to match JWT expiration
     });
 
@@ -60,6 +60,7 @@ export class AuthService {
         username: decoded.username,
       };
     } catch (error) {
+      console.error('Token validation failed:', error);
       throw new Error('Invalid token');
     }
   }
