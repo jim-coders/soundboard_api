@@ -27,7 +27,7 @@ app.use(
   cors({
     origin: corsOrigin,
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     maxAge: 86400,
   })
