@@ -22,14 +22,19 @@ export class AuthService {
     );
 
     const isProduction = process.env.NODE_ENV === 'production';
+    console.log('Environment:', isProduction ? 'production' : 'development');
 
     // Set HTTP-only cookie
-    res.cookie('auth_token', token, {
+    const cookieOptions = {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      sameSite: isProduction ? ('none' as const) : ('lax' as const),
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days to match JWT expiration
-    });
+    };
+    console.log('Cookie options:', JSON.stringify(cookieOptions, null, 2));
+
+    res.cookie('auth_token', token, cookieOptions);
+    console.log('Cookie set with token:', token.substring(0, 20) + '...');
 
     // Return only user data
     return {
@@ -51,10 +56,12 @@ export class AuthService {
     token: string
   ): Promise<{ userId: ObjectId; username: string }> {
     try {
+      console.log('Validating token:', token.substring(0, 20) + '...');
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
         userId: string;
         username: string;
       };
+      console.log('Token decoded successfully:', decoded);
       return {
         userId: new ObjectId(decoded.userId),
         username: decoded.username,
