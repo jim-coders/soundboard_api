@@ -31,6 +31,7 @@ app.use(
     maxAge: 86400,
   })
 );
+console.log('CORS configured with origin:', corsOrigin);
 app.use(helmet());
 app.use(passport.initialize());
 passportConfig(passport);
