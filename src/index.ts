@@ -22,17 +22,17 @@ const port = appPort || 4000;
 // Middlewares
 app.use(express.json());
 app.use(cookieParser());
-app.use(helmet());
 app.use(
   cors({
     origin: corsOrigin,
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Set-Cookie'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     maxAge: 86400,
   })
 );
-console.log('CORS configured with origin:', corsOrigin);
+app.use(helmet());
 app.use(passport.initialize());
 passportConfig(passport);
 
