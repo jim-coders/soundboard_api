@@ -9,7 +9,6 @@ const authHandler = (req: Request, res: Response, next: NextFunction): void => {
       return next(err);
     }
     if (!user) {
-      console.log('No user found in auth token');
       return res.status(401).json({ message: 'Unauthorized' });
     }
     req.user = user;
