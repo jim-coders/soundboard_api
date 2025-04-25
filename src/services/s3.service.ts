@@ -17,6 +17,8 @@ const ALLOWED_AUDIO_TYPES = [
   'audio/ogg', // .ogg
   'audio/aac', // .aac
   'audio/m4a', // .m4a
+  'audio/x-m4a', // .m4a (alternative MIME type)
+  'audio/mp4', // .m4a (another alternative MIME type)
 ];
 
 export const generateUploadUrl = async (
